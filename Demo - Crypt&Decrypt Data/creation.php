@@ -6,10 +6,6 @@ include_once("db.php");
 $iv = generate_iv();
 $key = generate_user_key();
 
-// Idealy, IV and KEY should be stored in an other database with restricted access
-// It's stored to decrypt later
-$query = "INSERT INTO Crypto(iv, cle) VALUES('$iv', '$key')";
-mysqli_query($db, $query);
 
 // Encrypting data
 $prenom = encrypt("John", $iv, $key);
@@ -22,5 +18,13 @@ $login = "mySuperLogin";
 $password = "myS3cu4edP@ssw04d";
 
 $query = "INSERT INTO Users(nom, prenom, mail, telephone, login, password) VALUES('$nom', '$prenom', '$mail', '$telephone', '$login', '$password')";
+mysqli_query($db, $query);
+
+// Register after Users otherwise constraint key fail
+
+// Idealy, IV and KEY should be stored in an other database with restricted access
+// It's stored to decrypt later
+// Here UserID = 1, should remplace with $_SESSION['id']
+$query = "INSERT INTO Crypto(uid, iv, cle) VALUES(1, '$iv', '$key')";
 mysqli_query($db, $query);
 ?> 
