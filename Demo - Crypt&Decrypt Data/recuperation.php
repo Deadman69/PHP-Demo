@@ -2,7 +2,7 @@
 include_once("myFuncs.php");
 include_once("db.php");
 
-$query = "SELECT nom, prenom, mail, telephone, login, password FROM usersBis WHERE id = 1";
+$query = "SELECT nom, prenom, mail, telephone, login, password FROM Users WHERE id = 1";
 $reponse = $bddPDO->prepare($query);
 $reponse->execute();
 
