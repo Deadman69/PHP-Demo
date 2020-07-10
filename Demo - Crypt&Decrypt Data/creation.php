@@ -8,7 +8,7 @@ $key = generate_user_key();
 
 // Idealy, IV and KEY should be stored in an other database with restricted access
 // It's stored to decrypt later
-$query = "INSERT INTO crypto(iv, cle) VALUES('$iv', '$key')";
+$query = "INSERT INTO Crypto(iv, cle) VALUES('$iv', '$key')";
 mysqli_query($db, $query);
 
 // Encrypting data
@@ -21,6 +21,6 @@ $login = "mySuperLogin";
 // password_hash() instead, so password won't be decryptable
 $password = "myS3cu4edP@ssw04d";
 
-$query = "INSERT INTO usersBis(nom, prenom, mail, telephone, login, password) VALUES('$nom', '$prenom', '$mail', '$telephone', '$login', '$password')";
+$query = "INSERT INTO Users(nom, prenom, mail, telephone, login, password) VALUES('$nom', '$prenom', '$mail', '$telephone', '$login', '$password')";
 mysqli_query($db, $query);
 ?> 
