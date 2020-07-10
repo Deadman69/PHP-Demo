@@ -37,7 +37,7 @@ else
 	if($error == "")
 	{
 		$password = password_hash($password, PASSWORD_DEFAULT);
-		$query = "INSERT INTO usersBis(login, password, mail) VALUES('$login', '$password', '$mail')";
+		$query = "INSERT INTO Users(login, password, mail) VALUES('$login', '$password', '$mail')";
 		mysqli_query($db, $query);
 	}
 	else

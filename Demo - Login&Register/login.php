@@ -20,7 +20,7 @@ else
 	$login = mysqli_real_escape_string($db, $_GET['login']);
 	$password = mysqli_real_escape_string($db, $_GET['password']);
 
-	$query = "SELECT login, password FROM usersBis WHERE login = '$login'";
+	$query = "SELECT login, password FROM Users WHERE login = '$login'";
 	$reponse = $bddPDO->prepare($query);
 	$reponse->execute();
 
@@ -29,7 +29,7 @@ else
 		if(password_verify($password, $donnees['password']))
 			echo "Connexion acceptée, bienvenue ".$donnees['login']. " !";
 		else
-			echo "Mot de passe eronner !";
+			echo "Mot de passe éronné !";
 	}
 }
 ?> 
