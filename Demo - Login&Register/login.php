@@ -17,19 +17,18 @@ if($error != "")
 	echo "$error";
 else
 {
-	$login = mysqli_real_escape_string($db, $_GET['login']);
-	$password = mysqli_real_escape_string($db, $_GET['password']);
+	$login = htmlspecialchars(strip_tags($_GET['login']));
+	$password = htmlspecialchars(strip_tags($_GET['password']));
 
-	$query = "SELECT login, password FROM Users WHERE login = '$login'";
+	$query = "SELECT login, password FROM users WHERE login = '$login' LIMIT 1";
 	$reponse = $bddPDO->prepare($query);
 	$reponse->execute();
 
-	while ($donnees = $reponse->fetch())
-	{
+	while ($donnees = $reponse->fetch()) {
 		if(password_verify($password, $donnees['password']))
 			echo "Connexion acceptée, bienvenue ".$donnees['login']. " !";
 		else
-			echo "Mot de passe éronné !";
+			echo "Mot de passe eronné !";
 	}
 }
 ?> 

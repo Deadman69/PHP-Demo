@@ -22,23 +22,24 @@ if($error != "")
 	echo "$error";
 else
 {
-	$login = mysqli_real_escape_string($db, $_GET['login']);
-	$password = mysqli_real_escape_string($db, $_GET['password']);
-	$passwordVerif = mysqli_real_escape_string($db, $_GET['passwordConfirmation']);
-	$mail = mysqli_real_escape_string($db, $_GET['mail']);
+	$login = htmlspecialchars(strip_tags($_GET['login']));
+	$password = htmlspecialchars(strip_tags($_GET['password']));
+	$passwordVerif = htmlspecialchars(strip_tags($_GET['passwordConfirmation']));
+	$mail = htmlspecialchars(strip_tags($_GET['mail']));
 
 	if(isElementExisting($login, "login"))
 		$error = "Ce login est déjà utilisé";
 	if(isElementExisting($mail, "mail"))
 		$error = "Ce mail est déjà utilisé";
-	if($password != $passwordConfirmation)
+	if($password != $passwordVerif)
 		$error = "La confirmation ne correspond pas !";
 
 	if($error == "")
 	{
 		$password = password_hash($password, PASSWORD_DEFAULT);
 		$query = "INSERT INTO Users(login, password, mail) VALUES('$login', '$password', '$mail')";
-		mysqli_query($db, $query);
+		$result = $bddPDO->prepare($query);
+		$result->execute();
 	}
 	else
 		echo "$error";
