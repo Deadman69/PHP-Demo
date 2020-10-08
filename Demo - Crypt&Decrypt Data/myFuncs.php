@@ -17,18 +17,22 @@ function generate_user_key()
 
 function get_key($db, $user_id)
 {
+	global $bddPDO;
 	$query = "SELECT cle FROM crypto WHERE uid = '".$user_id."' ";
-    $result = mysqli_query($db, $query);
-   	$data = mysqli_fetch_assoc($result);
-	return $data['cle'];
+    	$result = $bddPDO->prepare($query);
+	$result->execute();
+	$result->fetch(PDO::FETCH_OBJ)
+	return $result->cle;
 }
 
 function get_iv($db, $user_id)
 {
+	global $bddPDO;
 	$query = "SELECT iv FROM crypto WHERE uid = '".$user_id."' ";
-    $result = mysqli_query($db, $query);
-   	$data = mysqli_fetch_assoc($result);
-	return $data['iv'];
+    	$result = $bddPDO->prepare($query);
+	$result->execute();
+	$result->fetch(PDO::FETCH_OBJ)
+	return $result->iv;
 }
 
 function encrypt($string, $iv, $key)
