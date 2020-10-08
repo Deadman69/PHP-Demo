@@ -6,9 +6,9 @@ $query = "SELECT nom, prenom, mail, telephone, login, password FROM Users WHERE 
 $reponse = $bddPDO->prepare($query);
 $reponse->execute();
 
-// Get user KEY and IV
-$key = get_key($db, 1);
-$iv = get_iv($db, 1);
+// Get user KEY and IV with user ID (here 1)
+$key = get_key(1);
+$iv = get_iv(1);
 
 while ($donnees = $reponse->fetch())
 {
