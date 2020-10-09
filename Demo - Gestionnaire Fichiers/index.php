@@ -3,6 +3,12 @@
       $cookieExpiration = 3600; // cookie expiration time (in seconds). Cookies are used to store user position in the folders
 
 
+      // DONT TOUCH BELOW
+
+
+      $shouldEditFile = false; // Don't touch it
+      $fileToEdit = ""; // Don't touch it
+
       $actualDirectory = $baseDirectory;
       if(isset($_COOKIE["actualDirectory"])) { // If we are in a directory
             $actualDirectory = $_COOKIE["actualDirectory"];
@@ -64,6 +70,11 @@
             exit();
       }
 
+      if(isset($_GET["edit"])) { // If we want to edit a file
+            $fileToEdit = $_GET["edit"];
+            $shouldEditFile = true;
+      }
+
       if(isset($_FILES["upload"])) { // If we want to upload a file
             $path = htmlspecialchars($_POST["path"]);
             $fileName = "./".basename($_FILES['upload']['name']);
@@ -77,24 +88,29 @@
                   echo "<script>alert('The file ".$_FILES['upload']['name']." already exist ! Upload aborted.')</script>";
       }
 
+      if (isset($_POST['editFileModify'])) { // If user edit a file
+            $shouldEditFile = false;
+            $fileToEdit = $_POST["path"];
+            // save the text contents
+            file_put_contents($fileToEdit, $_POST['editFileModify']);
+
+            // redirect to form again
+            header(sprintf("Location: %s", "index.php"));
+            printf("<a href='%s'>Moved</a>.", htmlspecialchars("index.php"));
+            $fileToEdit = "";
+            exit();
+      }
+
       function formatSize($bytes, $format = '%.2f', $lang = 'en') { // From http://dev.petitchevalroux.net/php/afficher-taille-fichier-avec-une-unite-php.271.html
             static $units = array(
-            'en' => array(
-            'B',
-            'KB',
-            'MB',
-            'GB',
-            'TB'
-            ));
+            'en' => array('B','KB','MB','GB','TB'));
             $translatedUnits = &$units[$lang];
-            if(isset($translatedUnits)  === false)
-            {
+            if(isset($translatedUnits)  === false) {
                   $translatedUnits = &$units['en'];
             }
             $b = (double)$bytes;
             /*On gére le cas des tailles de fichier négatives*/
-            if($b > 0)
-            {
+            if($b > 0) {
                   $e = (int)(log($b,1024));
                   /**Si on a pas l'unité on retourne en To*/
                   if(isset($translatedUnits[$e]) === false)
@@ -103,8 +119,7 @@
                   }
                   $b = $b/pow(1024,$e);
             }
-            else
-            {
+            else {
                   $b = 0;
                   $e = 0;
             }
@@ -121,32 +136,42 @@
       <script src="bootstrap.bundle.min.js"></script>
 </head>
 <body>
-      <button onclick="gotoRacine()" class="btn btn-info">Revenir à la racine</button>
-      <button onclick="gotoUpperLevel()" class="btn btn-info">Remonter d'un niveau</button><br><br>
+      <?php if($shouldEditFile) { ?>
+            <form action="" method="post">
+                  <div class="form-group">
+                        <textarea name="editFileModify" class="form-control"><?php echo htmlspecialchars(file_get_contents($fileToEdit)); ?></textarea>
+                  </div>
+                  <input type="hidden" name="path" value="<?php echo $_GET["edit"];?>"><br>
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                  <button type="reset" class="btn btn-danger">Reset</button>
+            </form>
+            <br><br><br><br><br><br><br><br><br><br><br><br>
+      <?php } ?>
+      <button onclick="gotoRacine()" class="btn btn-info">Go to home</button>
+      <button onclick="gotoUpperLevel()" class="btn btn-info">Go one level upper</button><br><br>
       <form enctype="multipart/form-data" method="post" id="formUpload">
-            Fichier : <input name="upload" type="file">
+            File : <input name="upload" type="file">
             <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
-            <input type="submit" value="Uploader" class="btn btn-success"><br>
+            <input type="submit" value="Upload" class="btn btn-success"><br>
       </form>
 
       <form method="post" id="formFolder">
-            Nom : <input name="mkdir" type="text" autocomplete="off">
+            Name : <input name="mkdir" type="text" autocomplete="off">
             <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
-            <input type="submit" value="Créer" class="btn btn-success"><br>
+            <input type="submit" value="Create" class="btn btn-success"><br>
       </form>
 
       <form method="get" id="formRename">
-            Nouveau nom : <input name="rename" type="text" autocomplete="off" id="formRename_rename">
+            New name : <input name="rename" type="text" autocomplete="off" id="formRename_rename">
             <input type="hidden" name="path" value="<?php echo $actualDirectory;?>" id="formRename_path">
-            <input type="submit" value="Renommer" class="btn btn-success"><br>
+            <input type="submit" value="Rename" class="btn btn-success"><br>
       </form>
-
       <div class="row">
             <div class="col-md-5">
                   <table id="FoldersTable" class="table">
                         <thead>
                               <tr>
-                                    <td onclick="showCreateFolder()"><h2>Dossiers (Cliquer pour créer un dossier dans "<?php echo $actualDirectory; ?>")</h2></td>
+                                    <td onclick="showCreateFolder()"><h2>Folders (Click to create a folder in "<?php echo $actualDirectory; ?>")</h2></td>
                                     <td></td>
                               </tr>
                         </thead>
@@ -156,7 +181,7 @@
                   <table id="FilesTable" class="table table-striped">
                         <thead>
                               <tr>
-                                    <td onclick="showUpload()"><h2>Fichiers (Cliquer pour upload un fichier dans "<?php echo $actualDirectory; ?>")</h2></td>
+                                    <td onclick="showUpload()"><h2>Files (Click to upload a file in "<?php echo $actualDirectory; ?>")</h2></td>
                                     <td></td>
                                     <td></td>
                               </tr>
@@ -166,6 +191,7 @@
             </div>
       </div>
       <?php
+      
             $directory = opendir( $actualDirectory );
             while( $dir = readdir($directory) ) 
             {
@@ -184,7 +210,7 @@
                                                             <a class="dropdown-item" href="?cd=<?php echo $actualDirectory."/".$dir;?>">Navigate</a>
                                                             <a class="dropdown-item" href="#" onclick="renameFileFolder('<?php echo $actualDirectory."/".$dir;?>')">Rename Folder</a>
 
-                                                            <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir;?>', true)">Delete Folder</a>
+                                                            <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir;?>', true)" onmouseover="this.style.background='red';" onmouseout="this.style.background='#ffffff';">Delete Folder</a>
                                                         </div>
                                                       </div>`;
                               </script>
@@ -200,10 +226,12 @@
                                                           Actions
                                                         </button>
                                                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                          <a class="dropdown-item" href="?download=<?php echo $actualDirectory."/".$dir;?>">Download</a>
+                                                          <a class="dropdown-item" href="?download=<?php echo $actualDirectory."/".$dir; ?>">Download</a>
                                                           <a class="dropdown-item" href="#" onclick="renameFileFolder('<?php echo $actualDirectory."/".$dir;?>')">Rename File</a>
+                                                          <a class="dropdown-item" href="<?php echo $actualDirectory."/".$dir;?>" target="_blank">Launch file</a>
+                                                          <a class="dropdown-item" href="?edit=<?php echo $actualDirectory."/".$dir; ?>">Edit File</a>
 
-                                                          <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir; ?>', false)">Delete File</a>
+                                                          <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir; ?>', false)" onmouseover="this.style.background='red';" onmouseout="this.style.background='#ffffff';">Delete File</a>
                                                         </div>
                                                       </div>`;
                         </script>
