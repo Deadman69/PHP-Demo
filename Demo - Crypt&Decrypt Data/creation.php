@@ -17,16 +17,16 @@ $login = htmlspecialchars(strip_tags("mySuperLogin"));
 // password_hash() instead, so password won't be decryptable
 $password = htmlspecialchars(strip_tags("myS3cu4edP@ssw04d"));
 
-$query = "INSERT INTO Users(nom, prenom, mail, telephone, login, password) VALUES('$nom', '$prenom', '$mail', '$telephone', '$login', '$password')";
+$query = "INSERT INTO Users(nom, prenom, mail, telephone, login, password) VALUES(?, ?, ?, ?, ?, ?)";
 $result = $bddPDO->prepare($query);
-$result->execute();
+$result->execute(array($nom, $prenom, $mail, $telephone, $login, $password));
 
 // Register after Users otherwise constraint key fail
 
 // Idealy, IV and KEY should be stored in an other database with restricted access
 // It's stored to decrypt later
 // Here UserID = 1, should remplace with $_SESSION['id']
-$query = "INSERT INTO Crypto(uid, iv, cle) VALUES(1, '$iv', '$key')";
+$query = "INSERT INTO Crypto(uid, iv, cle) VALUES(1, ?, ?)";
 $result = $bddPDO->prepare($query);
-$result->execute();
+$result->execute(array($iv, $key));
 ?> 

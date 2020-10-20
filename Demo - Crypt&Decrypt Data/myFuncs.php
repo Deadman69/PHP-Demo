@@ -49,7 +49,7 @@ function decrypt($crypted_string, $iv, $key)
 	$ciphering = "AES-128-CTR"; 
 	$options = 0;
 
-	$decryption = openssl_decrypt ($crypted_string, $ciphering, $key, $options, $iv);
+	$decryption = openssl_decrypt($crypted_string, $ciphering, $key, $options, $iv);
 	return $decryption;
 }
 ?>

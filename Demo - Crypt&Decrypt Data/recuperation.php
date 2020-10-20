@@ -2,13 +2,15 @@
 include_once("myFuncs.php");
 include_once("db.php");
 
-$query = "SELECT nom, prenom, mail, telephone, login, password FROM Users WHERE id = 1";
+$userID = 1;
+
+$query = "SELECT nom, prenom, mail, telephone, login, password FROM Users WHERE id = ?";
 $reponse = $bddPDO->prepare($query);
-$reponse->execute();
+$reponse->execute(array($userID));
 
 // Get user KEY and IV with user ID (here 1)
-$key = get_key(1);
-$iv = get_iv(1);
+$key = get_key($userID);
+$iv = get_iv($userID);
 
 while ($donnees = $reponse->fetch())
 {
