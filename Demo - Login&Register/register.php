@@ -3,7 +3,7 @@ include_once("funcs.php");
 include_once("db.php");
 
 /*
-Input: login, password
+Input: login, password, passwordConfirmation, mail
 GET by default, could be transformed in post easily
 */
 
@@ -37,9 +37,11 @@ else
 	if($error == "")
 	{
 		$password = password_hash($password, PASSWORD_DEFAULT);
-		$query = "INSERT INTO Users(login, password, mail) VALUES('$login', '$password', '$mail')";
+		$query = 'INSERT INTO Users(login, password, mail) VALUES(?, ?, ?)';
 		$result = $bddPDO->prepare($query);
-		$result->execute();
+		$result->execute(array($login, $password, $mail)); // They need to be in the right order (the same as above)
+
+		echo "Enregistrement...";
 	}
 	else
 		echo "$error";

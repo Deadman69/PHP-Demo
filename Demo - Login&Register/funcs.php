@@ -4,15 +4,17 @@ include_once("db.php");
 function isElementExisting($value, $type)
 {
 	global $bddPDO;
-	$query = "SELECT COUNT(id) as total FROM usersBis WHERE $type = '$value' ";
+	$query = 'SELECT id as total FROM users WHERE '.$type.' = ? ';
 
 	$result = $bddPDO->prepare($query);
-	$result->execute();
+	$result->execute(array($value));
 
-	if( $result->rowCount() == 1)
+	if( $result->rowCount() >= 1) {
 		return true;
-	else
+	}
+	else {
 		return false;
+	}
 }
 
 ?>

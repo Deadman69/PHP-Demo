@@ -20,9 +20,9 @@ else
 	$login = htmlspecialchars(strip_tags($_GET['login']));
 	$password = htmlspecialchars(strip_tags($_GET['password']));
 
-	$query = "SELECT login, password FROM users WHERE login = '$login' LIMIT 1";
+	$query = "SELECT login, password FROM users WHERE login = ? LIMIT 1";
 	$reponse = $bddPDO->prepare($query);
-	$reponse->execute();
+	$reponse->execute(array($login));
 
 	while ($donnees = $reponse->fetch()) {
 		if(password_verify($password, $donnees['password']))

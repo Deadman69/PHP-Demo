@@ -2,7 +2,7 @@
 $host = "localhost";
 $user_mysql = "admin";    // nom de l'utilisateur MySQL 
 $password_mysql = "admin";    // mot de passe de l'utilisateur MySQL
-$database = "erich_test";
+$database = "test";
 
 try
 {
