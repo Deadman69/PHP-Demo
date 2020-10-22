@@ -4,7 +4,6 @@ include("db.php");
 
 $filePath = "temp/test.txt"; // Where the file to encrypt is stored
 $newFilePath = "encrypted/".basename($filePath); // Where the encrypted file will be stored
-$fileContent = file_get_contents($filePath); // The file content
 $key = generate_key();
 $iv = generate_iv();
 
