@@ -12,11 +12,16 @@
       $actualDirectory = $baseDirectory;
       if(isset($_COOKIE["actualDirectory"])) { // If we are in a directory
             $actualDirectory = $_COOKIE["actualDirectory"];
+
+            if(!file_exists($actualDirectory)) // If directory does not exist
+                  $actualDirectory = $baseDirectory;
       }
 
       if(isset($_GET["rmfile"]) && file_exists($_GET["rmfile"])) { // If we want to delete a file and file exist
             $path = htmlspecialchars($_GET["rmfile"]);
             unlink($path);
+
+            redirectTo($actualDirectory);
       }
 
       if(isset($_GET["rmdir"]) && file_exists($_GET["rmdir"])) { // If we want to delete a folder and folder exist
@@ -24,6 +29,8 @@
             if(!rmdir($path)) {
                   echo "<script>alert('The folder $path could not be suppressed ! Try emptying the folder and check if it is not used by any process.')</script>";
             }
+
+            redirectTo($baseDirectory);
       }
 
       if(isset($_POST["mkdir"])) { // If we want to create a folder and folder doesn't exist
@@ -34,6 +41,8 @@
             }
             else
                   echo "<script>alert('The folder $path already exist ! Creation aborted.')</script>";
+
+            redirectTo($path);
       }
 
       if(isset($_GET["cd"])) { // If we want to change directory
@@ -54,10 +63,12 @@
                   echo "<script>alert('The file $rename already exist ! Rename aborted.')</script>";
             } else
                   rename($path, $rename);
+
+            redirectTo($actualDirectory);
       }
 
       if(isset($_GET["download"])) { // If we want to download a specific file
-            setcookie("actualDirectory", $path, time() + $cookieExpiration);
+            // setcookie("actualDirectory", $path, time() + $cookieExpiration);
 
             $path = $_GET["download"];
             header('Content-Type: application/octet-stream');
@@ -68,6 +79,8 @@
             header('Expires: 0');
             readfile($path);
             exit();
+
+            redirectTo($actualDirectory);
       }
 
       if(isset($_GET["edit"])) { // If we want to edit a file
@@ -86,19 +99,41 @@
                   setcookie("actualDirectory", $path, time() + $cookieExpiration);
             } else
                   echo "<script>alert('The file ".$_FILES['upload']['name']." already exist ! Upload aborted.')</script>";
+
+            redirectTo($actualDirectory);
+      }
+
+      if(isset($_POST['nameFileToCreate']) && isset($_POST['path'])) { // If we want to create a new file
+            $path = $_POST['path'];
+            $fileName = $_POST['nameFileToCreate'];
+
+            if(!file_exists($path."/".$fileName)) {
+                  fopen($path."/".$fileName, "w");
+            } else
+                  echo "<script>alert('Oops, this file already exist !')</script>";
+
+            redirectTo($actualDirectory);
       }
 
       if (isset($_POST['editFileModify'])) { // If user edit a file
             $shouldEditFile = false;
             $fileToEdit = $_POST["path"];
-            // save the text contents
-            file_put_contents($fileToEdit, $_POST['editFileModify']);
+            file_put_contents($fileToEdit, $_POST['editFileModify']); // Save new text
 
-            // redirect to form again
-            header(sprintf("Location: %s", "index.php"));
-            printf("<a href='%s'>Moved</a>.", htmlspecialchars("index.php"));
             $fileToEdit = "";
-            exit();
+            redirectTo($actualDirectory);
+      }
+
+      if (isset($_GET['newChmod']) && isset($_GET['fileEditCHMOD'])) {
+            $newCHMOD = $_GET['newChmod'];
+            $file = $_GET['fileEditCHMOD'];
+            if (file_exists($file)) {
+                  if (!chmod($file, octdec($newCHMOD))) 
+                        alert("Oops, CHMOD change has fail !");
+            } else
+                  echo "<script>alert('This file does not exist !')";
+
+            redirectTo($actualDirectory);
       }
 
       function formatSize($bytes, $format = '%.2f', $lang = 'en') { // From http://dev.petitchevalroux.net/php/afficher-taille-fichier-avec-une-unite-php.271.html
@@ -124,6 +159,10 @@
                   $e = 0;
             }
             return sprintf($format.' %s',$b,$translatedUnits[$e]);
+      }
+
+      function redirectTo($url) {
+            echo "<script>window.location.replace('./index.php?cd=".$url."');</script>";
       }
 ?>
 
@@ -153,6 +192,11 @@
             File : <input name="upload" type="file">
             <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
             <input type="submit" value="Upload" class="btn btn-success"><br>
+      </form>
+      <form enctype="multipart/form-data" method="post" id="formCreateFile">
+            Or enter the name of the file to create : <input name="nameFileToCreate" type="text" autocomplete="off">
+            <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
+            <input type="submit" value="Create" class="btn btn-success"><br><br><br>
       </form>
 
       <form method="post" id="formFolder">
@@ -193,6 +237,7 @@
       <?php
       
             $directory = opendir( $actualDirectory );
+            $autoincrementValue = 0;
             while( $dir = readdir($directory) ) 
             {
                   if (is_dir( $actualDirectory . "/" . $dir) )
@@ -209,6 +254,7 @@
                                                         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                                             <a class="dropdown-item" href="?cd=<?php echo $actualDirectory."/".$dir;?>">Navigate</a>
                                                             <a class="dropdown-item" href="#" onclick="renameFileFolder('<?php echo $actualDirectory."/".$dir;?>')">Rename Folder</a>
+                                                            <a class="dropdown-item" href="#" customCHMOD="<?php echo substr(sprintf('%o', fileperms($actualDirectory."/".$dir)), -4); ?>" onclick="showUpdateCHMOD(<?php echo $autoincrementValue; ?>, '<?php echo $actualDirectory."/".$dir;?>')" id="buttonCHMOD_<?php echo $autoincrementValue; ?>">Change CHMOD</a>
 
                                                             <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir;?>', true)" onmouseover="this.style.background='red';" onmouseout="this.style.background='#ffffff';">Delete Folder</a>
                                                         </div>
@@ -230,6 +276,7 @@
                                                           <a class="dropdown-item" href="#" onclick="renameFileFolder('<?php echo $actualDirectory."/".$dir;?>')">Rename File</a>
                                                           <a class="dropdown-item" href="<?php echo $actualDirectory."/".$dir;?>" target="_blank">Launch file</a>
                                                           <a class="dropdown-item" href="?edit=<?php echo $actualDirectory."/".$dir; ?>">Edit File</a>
+                                                          <a class="dropdown-item" href="#" customCHMOD="<?php echo substr(sprintf('%o', fileperms($actualDirectory."/".$dir)), -4); ?>" onclick="showUpdateCHMOD(<?php echo $autoincrementValue; ?>, '<?php echo $actualDirectory."/".$dir;?>')" id="buttonCHMOD_<?php echo $autoincrementValue; ?>">Change CHMOD</a>
 
                                                           <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir; ?>', false)" onmouseover="this.style.background='red';" onmouseout="this.style.background='#ffffff';">Delete File</a>
                                                         </div>
@@ -237,6 +284,8 @@
                         </script>
                         <?php
                   }
+
+                  $autoincrementValue++;
             }
             closedir($directory);
       ?>
@@ -247,17 +296,39 @@
       var formUpload = document.getElementById("formUpload");
       var formFolder = document.getElementById("formFolder");
       var formRename = document.getElementById("formRename");
+      var formCreateFile = document.getElementById("formCreateFile");
 
       formUpload.style.display = "none";
       formFolder.style.display = "none";
       formRename.style.display = "none";
+      formCreateFile.style.display = "none";
 
       function showUpload() {
             formUpload.style.display = "block";
+            formCreateFile.style.display = "block";
+            formFolder.style.display = "none";
+            formRename.style.display = "none";
       }
-
       function showCreateFolder() {
+            formUpload.style.display = "none";
+            formCreateFile.style.display = "none";
             formFolder.style.display = "block";
+            formRename.style.display = "none";
+      }
+      function renameFileFolder(pathToRename) {
+            var formRename_rename = document.getElementById("formRename_rename");
+            var formRename_path = document.getElementById("formRename_path");
+
+            var fileName = pathToRename.split("/");
+            fileName = fileName[fileName.length - 1];
+
+            formRename_rename.value = fileName;
+            formRename_path.value = pathToRename;
+            
+            formUpload.style.display = "none";
+            formCreateFile.style.display = "none";
+            formFolder.style.display = "none";
+            formRename.style.display = "block";
       }
 
 
@@ -279,18 +350,6 @@
             window.location.replace("index.php?cd=" + newPath);
       }
 
-      function renameFileFolder(pathToRename) {
-            var formRename_rename = document.getElementById("formRename_rename");
-            var formRename_path = document.getElementById("formRename_path");
-
-            formRename.style.display = "block";
-            var fileName = pathToRename.split("/");
-            fileName = fileName[fileName.length - 1];
-
-            formRename_rename.value = fileName;
-            formRename_path.value = pathToRename;
-      }
-
       function confirmDelete(pathToDelete, type) { // type = boolean, true: folder, false: file
             console.log("ok");
             var message = "Do you really want to delete this ";
@@ -304,6 +363,15 @@
                         window.location.replace("?rmdir=" + pathToDelete);
                   else
                         window.location.replace("?rmfile=" + pathToDelete);
+            }
+      }
+
+      function showUpdateCHMOD(id, pathToModify) {
+            var actualCHMOD = document.getElementById("buttonCHMOD_" + id);
+            var newCHMOD = prompt("Enter the new CHMOD", actualCHMOD.getAttribute("customCHMOD"));
+
+            if (newCHMOD != null) {
+                  window.location.replace("?fileEditCHMOD=" + pathToModify + "&newChmod=" + newCHMOD);
             }
       }
 </script>
