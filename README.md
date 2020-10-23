@@ -2,4 +2,4 @@
 Some PHP Demo made by me
 
 
-Todo: ?
+Todo: pouvoir changer le CHMOD du gestionnaire de fichiers
