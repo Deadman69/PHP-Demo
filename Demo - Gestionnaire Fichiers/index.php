@@ -1,5 +1,5 @@
 <?php
-      $baseDirectory = "."; // Base repository, should let at "."
+      $baseDirectory = "D:/Programmes/Xampp/htdocs"; // Base repository, "." = active directory, example "localhost/gestion"
       $cookieExpiration = 3600; // cookie expiration time (in seconds). Cookies are used to store user position in the folders
 
 
