@@ -1,5 +1,5 @@
 <?php
-      $baseDirectory = "D:/Programmes/Xampp/htdocs"; // Base repository. "." will work.
+      $baseDirectory = "D:/Programmes/Xampp/htdocs"; // Base repository. "." will not work. Use "realP()" in console when logged to show the actual path
       $cookieExpiration = 3600; // cookie expiration time (in seconds). Cookies is overused. Should not set it under 60.
       $attempsLockFail = 3; // After 3 wrong attempts, user will be blocked for the time provided below
       $timeLockFail = 60; // if user fail more than X attempts, he will be blocked for the time provided here
@@ -14,6 +14,11 @@
       $errorLoginMessage = "You are not logged in (or you had provided a wrong password)"; // Don't touch it
 
       $actualDirectory = $baseDirectory;
+
+      if(isset($_SESSION["isFirstLoad"]) && $_SESSION["isFirstLoad"]) { // Executed once when user is connected
+            $_SESSION["isFirstLoad"] = false;
+      }
+
       if(isset($_COOKIE["actualDirectory"])) { // If we are in a directory
             $actualDirectory = $_COOKIE["actualDirectory"];
             if(!file_exists($actualDirectory)) // If directory does not exist
@@ -25,8 +30,11 @@
             if($passwordProvided == $password) {
                   $errorLoginMessage = "";
                   $_SESSION["isLogged"] = true;
+                  $_SESSION["isFirstLoad"] = true;
                   $_SESSION["wrongAttemptsCount"] = 0;
                   $_SESSION["blockConnection"] = 0;
+
+                  echo "<script>window.location.replace('index.php');</script>";
             } else {
                   $_SESSION["isLogged"] = false;
                   if($_SESSION["blockConnection"] < time() && $_SESSION["blockConnection"] != 0) {
@@ -513,6 +521,7 @@ if($fileToLaunch == "") {
             }
       }
 
+      function realP() { console.log("<?php echo getcwd(); ?>"); }
 
       <?php if($shouldEditFile) { ?>
       var modal = document.getElementById("editModal");
