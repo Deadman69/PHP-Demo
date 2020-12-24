@@ -199,28 +199,11 @@
             redirectTo("index.php");
       }
 
-      function formatSize($bytes, $format = '%.2f', $lang = 'en') { // From http://dev.petitchevalroux.net/php/afficher-taille-fichier-avec-une-unite-php.271.html
-            static $units = array('en' => array('B','KB','MB','GB','TB'));
-            $translatedUnits = &$units[$lang];
-            if(isset($translatedUnits)  === false) {
-                  $translatedUnits = &$units['en'];
-            }
-            $b = (double)$bytes;
-            /*On gére le cas des tailles de fichier négatives*/
-            if($b > 0) {
-                  $e = (int)(log($b,1024));
-                  /**Si on a pas l'unité on retourne en To*/
-                  if(isset($translatedUnits[$e]) === false) {
-                        $e = 4;
-                  }
-                  $b = $b/pow(1024,$e);
-            }
-            else { $b = 0; $e = 0; }
-            return sprintf($format.' %s',$b,$translatedUnits[$e]);
-      }
+      function formatSize($bytes, $format = '%.2f', $lang = 'en') { static $units = array('en' => array('B','KB','MB','GB','TB')); $translatedUnits = &$units[$lang]; if(isset($translatedUnits)  === false) { $translatedUnits = &$units['en']; } $b = (double)$bytes; if($b > 0) { $e = (int)(log($b,1024)); if(isset($translatedUnits[$e]) === false) { $e = 4; } $b = $b/pow(1024,$e); } else { $b = 0; $e = 0; } return sprintf($format.' %s',$b,$translatedUnits[$e]); } // From http://dev.petitchevalroux.net/php/afficher-taille-fichier-avec-une-unite-php.271.html 
       function redirectTo($url) { echo "<script>window.location.replace('#');</script>"; }
       function isLogged() { if(isset($_SESSION["isLogged"]) and $_SESSION["isLogged"]) return true; else return false; }
       function isBlocked() { global $attempsLockFail; if(isset($_SESSION["wrongAttemptsCount"]) && $_SESSION["wrongAttemptsCount"] >= $attempsLockFail && isset($_SESSION["blockConnection"]) && $_SESSION["blockConnection"] >= time()) return true; else return false; }
+
 if($fileToLaunch == "") {
 ?>
 
@@ -250,20 +233,24 @@ if($fileToLaunch == "") {
       <?php
       if(isLogged()) {
             if($shouldEditFile) { ?>
-                  <form method="post">
-                        <div class="form-group">
-                              <?php
-                                    $numberLines = substr_count(file_get_contents($fileToEdit), "\n");
-                                    if($numberLines > 20)
-                                          $numberLines = 20;
-                              ?>
-                              <textarea name="editFileModify" class="form-control" rows="<?php echo $numberLines; ?>"><?php echo htmlspecialchars(file_get_contents($fileToEdit)); ?></textarea>
-                        </div>
-                        <input type="hidden" name="path" value="<?php echo $fileToEdit;?>"><br>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <button type="reset" class="btn btn-danger">Reset</button>
-                  </form>
-                  <br><br><br><br><br><br><br><br><br><br><br><br>
+                  <div style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4);" id="editModal">
+                        <form method="post">
+                              <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%;">
+                                    <span style="color: #aaa; float: right; font-size: 28px; font-weight: bold;" id="closeModal">&times;</span>
+                                    <div class="form-group">
+                                          <?php
+                                                $numberLines = substr_count(file_get_contents($fileToEdit), "\n");
+                                                if($numberLines > 20)
+                                                      $numberLines = 20;
+                                          ?>
+                                          <textarea name="editFileModify" class="form-control" rows="<?php echo $numberLines; ?>"><?php echo htmlspecialchars(file_get_contents($fileToEdit)); ?></textarea>
+                                    </div>
+                                    <input type="hidden" name="path" value="<?php echo $fileToEdit;?>"><br>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="reset" class="btn btn-danger">Reset</button>
+                              </div>
+                        </form>
+                  </div>
             <?php } ?>
             <button onclick="gotoRacine()" class="btn btn-info">Go to home</button>
             <button onclick="gotoUpperLevel()" class="btn btn-info">Go one level upper</button>
@@ -499,7 +486,20 @@ if($fileToLaunch == "") {
             }
       }
 
-      <?php } ?>
+
+      <?php if($shouldEditFile) { ?>
+      var modal = document.getElementById("editModal");
+      var span = document.getElementById("closeModal");
+      modal.style.display = "block";
+      span.onclick = function() {
+        modal.style.display = "none";
+      }
+      window.onclick = function(event) { // When the user clicks anywhere outside of the modal, close it
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+      <?php } } ?>
 </script>
 
 </html>
