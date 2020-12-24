@@ -259,7 +259,7 @@ if($fileToLaunch == "") {
                                           ?>
                                           <textarea name="editFileModify" class="form-control" rows="<?php echo $numberLines; ?>"><?php echo htmlspecialchars(file_get_contents($fileToEdit)); ?></textarea>
                                     </div>
-                                    <input type="hidden" name="path" value="<?php echo $fileToEdit;?>"><br>
+                                    <input type="hidden" name="path" value="<?php echo $fileToEdit;?>">
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                     <button type="reset" class="btn btn-danger">Reset</button>
                               </form>
@@ -268,7 +268,7 @@ if($fileToLaunch == "") {
             <?php } ?>
             <button onclick="gotoRacine()" class="btn btn-info">Go to home</button>
             <button onclick="gotoUpperLevel()" class="btn btn-info">Go one level upper</button>
-            <button onclick="disconnect()" class="btn btn-danger" style="float: right;">Disconnect</button><br><br>
+            <button onclick="disconnect()" class="btn btn-danger" style="float: right;">Disconnect</button>
             <div class="modal" id="fileModal">
                   <div class="modal-content">
                         <form enctype="multipart/form-data" method="post" id="formUpload">
@@ -287,7 +287,7 @@ if($fileToLaunch == "") {
             <div class="modal" id="folderModal">
                   <div class="modal-content">
                         <form method="post" id="formFolder">
-                              <span class="close" id="closeModalFile">&times;</span>
+                              <span class="close" id="closeModalFolder">&times;</span>
                               Name : <input name="mkdir" type="text" autocomplete="off">
                               <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
                               <input type="submit" value="Create" class="btn btn-success"><br>
@@ -296,16 +296,16 @@ if($fileToLaunch == "") {
             </div>
             <div class="modal" id="renameModal">
                   <div class="modal-content">
-                        <div id="formRename">
+                        <form id="formRename" onsubmit="renameFunc()">
                               <span class="close" id="closeModalFile">&times;</span>
                               New name : <input name="rename" type="text" autocomplete="off" id="formRename_rename">
                               <input type="hidden" name="path" value="<?php echo $actualDirectory;?>" id="formRename_path">
-                              <button class="btn btn-success" onclick="renameFunc()">Rename</button><br>
-                        </div>
+                              <input type="submit" class="btn btn-success" value="Rename">
+                        </form>
                   </div>
             </div>
 
-            <div class="row">
+            <div class="row" style="margin-top: 2%;">
                   <div class="col-md-5">
                         <table id="FoldersTable" class="table">
                               <thead>
@@ -338,7 +338,9 @@ if($fileToLaunch == "") {
                               if($dir != "." && $dir != "..") {
                                     ?>
                                     var row = document.getElementById("FoldersTable").insertRow(1);
-                                    row.insertCell(0).innerHTML = `<a onclick="cd('<?php echo $actualDirectory."/".$dir;?>')"><?php echo $dir; ?></a>`;
+                                    var tempRow = row.insertCell(0)
+                                    tempRow.innerHTML = "<?php echo $dir; ?>";
+                                    tempRow.onclick = function(){ cd('<?php echo $actualDirectory."/".$dir;?>') };
                                     row.insertCell(1).innerHTML = `<div class="dropdown">
                                                               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                                 Actions
@@ -356,7 +358,9 @@ if($fileToLaunch == "") {
                         } else {
                               ?>
                               var row = document.getElementById("FilesTable").insertRow(1);
-                              row.insertCell(0).innerHTML = "<?php echo $dir.' ('.formatSize(filesize($actualDirectory.'/'.$dir)).')'; ?>";
+                              var tempRow = row.insertCell(0);
+                              tempRow.innerHTML = "<?php echo $dir.' ('.formatSize(filesize($actualDirectory.'/'.$dir)).')'; ?>";
+                              tempRow.onclick = function(){ editFile('<?php echo $actualDirectory."/".$dir; ?>') };
                               row.insertCell(1).innerHTML = `<div class="dropdown">
                                                               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                                 Actions
