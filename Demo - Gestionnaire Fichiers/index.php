@@ -228,15 +228,21 @@ if($fileToLaunch == "") {
       <link rel="stylesheet" href="bootstrap.min.css">
       <script src="jquery.min.js"></script>
       <script src="bootstrap.bundle.min.js"></script>
+      <style type="text/css">
+            .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0);background-color: rgba(0,0,0,0.4); }
+            .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; }
+            .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+            .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+      </style>
 </head>
 <body>
       <?php
       if(isLogged()) {
             if($shouldEditFile) { ?>
-                  <div style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0,0,0,0.4);" id="editModal">
-                        <form method="post">
-                              <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%;">
-                                    <span style="color: #aaa; float: right; font-size: 28px; font-weight: bold;" id="closeModal">&times;</span>
+                  <div class="modal" id="editModal">
+                        <div class="modal-content">
+                              <form method="post">
+                                    <span class="close" id="closeModalEdit">&times;</span>
                                     <div class="form-group">
                                           <?php
                                                 $numberLines = substr_count(file_get_contents($fileToEdit), "\n");
@@ -248,34 +254,49 @@ if($fileToLaunch == "") {
                                     <input type="hidden" name="path" value="<?php echo $fileToEdit;?>"><br>
                                     <button type="submit" class="btn btn-primary">Submit</button>
                                     <button type="reset" class="btn btn-danger">Reset</button>
-                              </div>
-                        </form>
+                              </form>
+                        </div>
                   </div>
             <?php } ?>
             <button onclick="gotoRacine()" class="btn btn-info">Go to home</button>
             <button onclick="gotoUpperLevel()" class="btn btn-info">Go one level upper</button>
             <button onclick="disconnect()" class="btn btn-danger" style="float: right;">Disconnect</button><br><br>
-            <form enctype="multipart/form-data" method="post" id="formUpload">
-                  File : <input name="upload" type="file">
-                  <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
-                  <input type="submit" value="Upload" class="btn btn-success"><br>
-            </form>
-            <form enctype="multipart/form-data" method="post" id="formCreateFile">
-                  Or enter the name of the file to create : <input name="nameFileToCreate" type="text" autocomplete="off">
-                  <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
-                  <input type="submit" value="Create" class="btn btn-success"><br><br><br>
-            </form>
-
-            <form method="post" id="formFolder">
-                  Name : <input name="mkdir" type="text" autocomplete="off">
-                  <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
-                  <input type="submit" value="Create" class="btn btn-success"><br>
-            </form>
-            <div id="formRename">
-                  New name : <input name="rename" type="text" autocomplete="off" id="formRename_rename">
-                  <input type="hidden" name="path" value="<?php echo $actualDirectory;?>" id="formRename_path">
-                  <button class="btn btn-success" onclick="renameFunc()">Rename</button><br>
+            <div class="modal" id="fileModal">
+                  <div class="modal-content">
+                        <form enctype="multipart/form-data" method="post" id="formUpload">
+                              <span class="close" id="closeModalFile">&times;</span>
+                              File : <input name="upload" type="file">
+                              <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
+                              <input type="submit" value="Upload" class="btn btn-success"><br>
+                        </form>
+                        <form enctype="multipart/form-data" method="post" id="formCreateFile">
+                              Or enter the name of the file to create : <input name="nameFileToCreate" type="text" autocomplete="off">
+                              <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
+                              <input type="submit" value="Create" class="btn btn-success"><br><br><br>
+                        </form>
+                  </div>
             </div>
+            <div class="modal" id="folderModal">
+                  <div class="modal-content">
+                        <form method="post" id="formFolder">
+                              <span class="close" id="closeModalFile">&times;</span>
+                              Name : <input name="mkdir" type="text" autocomplete="off">
+                              <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
+                              <input type="submit" value="Create" class="btn btn-success"><br>
+                        </form>
+                  </div>
+            </div>
+            <div class="modal" id="renameModal">
+                  <div class="modal-content">
+                        <div id="formRename">
+                              <span class="close" id="closeModalFile">&times;</span>
+                              New name : <input name="rename" type="text" autocomplete="off" id="formRename_rename">
+                              <input type="hidden" name="path" value="<?php echo $actualDirectory;?>" id="formRename_path">
+                              <button class="btn btn-success" onclick="renameFunc()">Rename</button><br>
+                        </div>
+                  </div>
+            </div>
+
             <div class="row">
                   <div class="col-md-5">
                         <table id="FoldersTable" class="table">
@@ -300,18 +321,15 @@ if($fileToLaunch == "") {
                         </table>
                   </div>
             </div>
+            <script>
             <?php
-            
                   $directory = opendir( $actualDirectory );
                   $autoincrementValue = 0;
-                  while( $dir = readdir($directory) ) 
-                  {
-                        if (is_dir( $actualDirectory . "/" . $dir) )
-                        {
+                  while( $dir = readdir($directory) ) {
+                        if (is_dir( $actualDirectory . "/" . $dir) ) {
                               if($dir != "." && $dir != "..") {
-                                    ?><script>
-                                    var table = document.getElementById("FoldersTable");
-                                    var row = table.insertRow(1);
+                                    ?>
+                                    var row = document.getElementById("FoldersTable").insertRow(1);
                                     row.insertCell(0).innerHTML = `<a onclick="cd('<?php echo $actualDirectory."/".$dir;?>')"><?php echo $dir; ?></a>`;
                                     row.insertCell(1).innerHTML = `<div class="dropdown">
                                                               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -325,13 +343,11 @@ if($fileToLaunch == "") {
                                                                   <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir;?>', true)" onmouseover="this.style.background='red';" onmouseout="this.style.background='#ffffff';">Delete Folder</a>
                                                               </div>
                                                             </div>`;
-                                    </script>
                                     <?php
                               }
                         } else {
-                              ?><script>
-                              var table = document.getElementById("FilesTable");
-                              var row = table.insertRow(1);
+                              ?>
+                              var row = document.getElementById("FilesTable").insertRow(1);
                               row.insertCell(0).innerHTML = "<?php echo $dir.' ('.formatSize(filesize($actualDirectory.'/'.$dir)).')'; ?>";
                               row.insertCell(1).innerHTML = `<div class="dropdown">
                                                               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -347,13 +363,13 @@ if($fileToLaunch == "") {
                                                                 <a class="dropdown-item" href="#" onclick="confirmDelete('<?php echo $actualDirectory."/".$dir; ?>', false)" onmouseover="this.style.background='red';" onmouseout="this.style.background='#ffffff';">Delete File</a>
                                                               </div>
                                                             </div>`;
-                              </script>
                               <?php
                         }
 
                         $autoincrementValue++;
                   }
                   closedir($directory);
+            ?> </script> <?php
       } elseif(!isLogged() && !isBlocked()) {
             ?>
             <p><?php echo $errorLoginMessage; ?></p>
@@ -378,27 +394,31 @@ if($fileToLaunch == "") {
       <?php
       if(isLogged()) {
       ?>
-      var formUpload = document.getElementById("formUpload");
-      var formFolder = document.getElementById("formFolder");
-      var formRename = document.getElementById("formRename");
-      var formCreateFile = document.getElementById("formCreateFile");
-
-      formUpload.style.display = "none";
-      formFolder.style.display = "none";
-      formRename.style.display = "none";
-      formCreateFile.style.display = "none";
-
       function showUpload() {
-            formUpload.style.display = "block";
-            formCreateFile.style.display = "block";
-            formFolder.style.display = "none";
-            formRename.style.display = "none";
+            var modal = document.getElementById("fileModal");
+            var span = document.getElementById("closeModalFile");
+            modal.style.display = "block";
+            span.onclick = function() {
+              modal.style.display = "none";
+            }
+            window.onclick = function(event) { // When the user clicks anywhere outside of the modal, close it
+              if (event.target == modal) {
+                modal.style.display = "none";
+              }
+            }
       }
       function showCreateFolder() {
-            formUpload.style.display = "none";
-            formCreateFile.style.display = "none";
-            formFolder.style.display = "block";
-            formRename.style.display = "none";
+            var modal = document.getElementById("folderModal");
+            var span = document.getElementById("closeModalFolder");
+            modal.style.display = "block";
+            span.onclick = function() {
+              modal.style.display = "none";
+            }
+            window.onclick = function(event) { // When the user clicks anywhere outside of the modal, close it
+              if (event.target == modal) {
+                modal.style.display = "none";
+              }
+            }
       }
       function renameFileFolder(pathToRename) {
             var fileName = pathToRename.split("/");
@@ -407,10 +427,17 @@ if($fileToLaunch == "") {
             document.getElementById("formRename_rename").value = fileName;
             document.getElementById("formRename_path").value = pathToRename;
             
-            formUpload.style.display = "none";
-            formCreateFile.style.display = "none";
-            formFolder.style.display = "none";
-            formRename.style.display = "block";
+            var modal = document.getElementById("renameModal");
+            var span = document.getElementById("closeModalRename");
+            modal.style.display = "block";
+            span.onclick = function() {
+              modal.style.display = "none";
+            }
+            window.onclick = function(event) { // When the user clicks anywhere outside of the modal, close it
+              if (event.target == modal) {
+                modal.style.display = "none";
+              }
+            }
       }
       function gotoRacine() {
             document.cookie = "cd=" + '<?php echo $baseDirectory; ?>';
@@ -489,7 +516,7 @@ if($fileToLaunch == "") {
 
       <?php if($shouldEditFile) { ?>
       var modal = document.getElementById("editModal");
-      var span = document.getElementById("closeModal");
+      var span = document.getElementById("closeModalEdit");
       modal.style.display = "block";
       span.onclick = function() {
         modal.style.display = "none";
