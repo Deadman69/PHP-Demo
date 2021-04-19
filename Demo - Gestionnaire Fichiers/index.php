@@ -1,9 +1,10 @@
 <?php
-      $baseDirectory = "D:/Programmes/Xampp/htdocs"; // Base repository. "." will not work. Use "realP()" in console when logged to show the actual path
+      $baseDirectory = "/challenge/web-serveur/ch20/galerie/upload/"; // Base repository. "." will not work. Use "realP()" in console when logged to show the actual path
       $cookieExpiration = 3600; // cookie expiration time (in seconds). Cookies is overused. Should not set it under 60.
       $attempsLockFail = 3; // After 3 wrong attempts, user will be blocked for the time provided below
       $timeLockFail = 60; // if user fail more than X attempts, he will be blocked for the time provided here
-      $password = "changeme"; // password to connect
+      $password = "netupas"; // password to connect
+      $basefilename = "test.php.png"; // this filename (should be "index.php")
 
       // DONT TOUCH BELOW
 
@@ -34,7 +35,7 @@
                   $_SESSION["wrongAttemptsCount"] = 0;
                   $_SESSION["blockConnection"] = 0;
 
-                  echo "<script>window.location.replace('index.php');</script>";
+                  echo "<script>window.location.replace('$basefilename');</script>";
             } else {
                   $_SESSION["isLogged"] = false;
                   if($_SESSION["blockConnection"] < time() && $_SESSION["blockConnection"] != 0) {
@@ -67,7 +68,7 @@
             setcookie("disconnect", "", time() - 42000);
             setcookie("actualDirectory", "", time() - 42000);
 
-            echo "<script>window.location.replace('index.php');</script>";
+            echo "<script>window.location.replace('$basefilename');</script>";
       }
 
       if(isset($_COOKIE["rmfile"]) && file_exists($_COOKIE["rmfile"])) { // If we want to delete a file and file exist
@@ -234,6 +235,7 @@ if($fileToLaunch == "") {
       }
       ?>
       <link rel="stylesheet" href="bootstrap.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
       <script src="jquery.min.js"></script>
       <script src="bootstrap.bundle.min.js"></script>
       <style type="text/css">
@@ -453,7 +455,7 @@ if($fileToLaunch == "") {
       }
       function gotoRacine() {
             document.cookie = "cd=" + '<?php echo $baseDirectory; ?>';
-            window.location.replace("index.php");
+            window.location.replace("<?php echo $basefilename; ?>");
       }
       function gotoUpperLevel() {
             var path = "<?php echo $actualDirectory; ?>";
@@ -468,34 +470,34 @@ if($fileToLaunch == "") {
             })
 
             document.cookie = "cd=" + newPath;
-            window.location.replace("index.php");
+            window.location.replace("<?php echo $basefilename; ?>");
       }
       function cd(pathToGo) {
             document.cookie = "cd=" + pathToGo;
-            window.location.replace("index.php");
+            window.location.replace("<?php echo $basefilename; ?>");
       }
       function editFile(pathToEdit) {
             document.cookie = "edit=" + pathToEdit;
-            window.location.replace("index.php");
+            window.location.replace("<?php echo $basefilename; ?>");
       }
       function launchFile(pathToLaunch) {
             document.cookie = "launch=" + pathToLaunch;
-            window.location.replace("index.php");            
+            window.location.replace("<?php echo $basefilename; ?>");            
       }
       function renameFunc() {
             document.cookie = "rename=" + document.getElementById("formRename_rename").value;
             document.cookie = "path=" + document.getElementById("formRename_path").value;
-            window.location.replace("index.php");
+            window.location.replace("<?php echo $basefilename; ?>");
       }
       function disconnect() {
             if(confirm("Do you want to disconnect ?")) {
                   document.cookie = "disconnect=true";
-                  window.location.replace("index.php");
+                  window.location.replace("<?php echo $basefilename; ?>");
             }
       }
       function downloadFile(pathToDownload) {
             document.cookie = "download=" + pathToDownload;
-            window.location.replace("index.php");
+            window.location.replace("<?php echo $basefilename; ?>");
       }
       function confirmDelete(pathToDelete, type) { // type = boolean, true: folder, false: file
             var message = "Do you really want to delete this ";
@@ -506,11 +508,11 @@ if($fileToLaunch == "") {
             if(confirm(message)) {
                   if(type) {
                         document.cookie = "rmdir=" + pathToDelete;
-                        window.location.replace("index.php");
+                        window.location.replace("<?php echo $basefilename; ?>");
                   }
                   else {
                         document.cookie = "rmfile=" + pathToDelete;
-                        window.location.replace("index.php");
+                        window.location.replace("<?php echo $basefilename; ?>");
                   }
             }
       }
@@ -521,7 +523,7 @@ if($fileToLaunch == "") {
             if (newCHMOD != null) {
                   document.cookie = "newChmod=" + newCHMOD;
                   document.cookie = "fileEditCHMOD=" + pathToModify;
-                  window.location.replace("index.php");
+                  window.location.replace("<?php echo $basefilename; ?>");
             }
       }
 
