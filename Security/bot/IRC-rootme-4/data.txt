@@ -1,0 +1,12 @@
+[":Deadman!25ad7b85@hzv-cc1.ali.pmnfip.IP","PRIVMSG","#root-me_challenge",":test\r\n"]
+
+
+[":Candy!Candy@root-me.org","PRIVMSG","BotTestChallangeOne",":eJwLc\/RLNk1zDMu2zMiKSIt0Skwuy3T1dg1MBQBsDQh4\r\n"]
+
+
+!ep4 -rep VANc5fAVk9hjXfYBacviEKEQe
+
+
+[":Candy!Candy@root-me.org","PRIVMSG","BotTestChallangeOne",":You","dit","it!","You","can","validate","the","challenge","with","the","password","tumasp0wned\r\n"]
+
+
