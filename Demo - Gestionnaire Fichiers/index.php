@@ -3,7 +3,7 @@
       $cookieExpiration = 3600; // cookie expiration time (in seconds). Cookies is overused. Should not set it under 60.
       $attempsLockFail = 3; // After 3 wrong attempts, user will be blocked for the time provided below
       $timeLockFail = 60; // if user fail more than X attempts, he will be blocked for the time provided here
-      $password = "netupas"; // password to connect
+      $password = "admin"; // password to connect
       $basefilename = "test.php.png"; // this filename (should be "index.php")
 
       // DONT TOUCH BELOW
