@@ -1,10 +1,10 @@
 <?php
-      $baseDirectory = "/challenge/web-serveur/ch20/galerie/upload/"; // Base repository. "." will not work. Use "realP()" in console when logged to show the actual path
+      $baseDirectory = "D:/Programmes/Xampp/htdocs"; // Base repository. "." will not work. Use "realP()" in console when logged to show the actual path
       $cookieExpiration = 3600; // cookie expiration time (in seconds). Cookies is overused. Should not set it under 60.
       $attempsLockFail = 3; // After 3 wrong attempts, user will be blocked for the time provided below
       $timeLockFail = 60; // if user fail more than X attempts, he will be blocked for the time provided here
       $password = "admin"; // password to connect
-      $basefilename = "test.php.png"; // this filename (should be "index.php")
+      $basefilename = "index.php"; // this filename (should be "index.php")
 
       // DONT TOUCH BELOW
 
@@ -153,20 +153,24 @@
             setcookie("edit", "", time() - 42000);
       }
 
-      if(isset($_FILES["upload"])) { // If we want to upload a file
+      if(isset($_POST['submitUpload'])){
             $path = htmlspecialchars($_POST["path"]);
-            $fileName = "./".basename($_FILES['upload']['name']);
-            if($path != ".")
-                  $fileName = $path."/".basename($_FILES['upload']['name']);
-
-            if(!file_exists($fileName)) {
-                  move_uploaded_file($_FILES['upload']['tmp_name'], $fileName);
-                  setcookie("actualDirectory", $path, time() + $cookieExpiration);
-            } else
-                  echo "<script>alert('The file ".$_FILES['upload']['name']." already exist ! Upload aborted.')</script>";
+            $countfiles = count($_FILES['upload']['name']);
+            
+            for($i = 0; $i < $countfiles; $i++){
+                  $fileName = "./".basename($_FILES['upload']['name'][$i]);
+                  if($path != ".")
+                        $fileName = $path."/".basename($_FILES['upload']['name'][$i]);
+                  
+                  if(!file_exists($fileName)) {
+                        move_uploaded_file($_FILES['upload']['tmp_name'][$i], $fileName);
+                        setcookie("actualDirectory", $path, time() + $cookieExpiration);
+                  } else
+                        echo "<script>alert('The file ".$_FILES['upload']['name'][$i]." already exist ! Upload aborted.')</script>";
+            }
 
             redirectTo($actualDirectory);
-      }
+      } 
 
       if(isset($_POST['nameFileToCreate']) && isset($_POST['path'])) { // If we want to create a new file
             $path = $_POST['path'];
@@ -275,9 +279,9 @@ if($fileToLaunch == "") {
                   <div class="modal-content">
                         <form enctype="multipart/form-data" method="post" id="formUpload">
                               <span class="close" id="closeModalFile">&times;</span>
-                              File : <input name="upload" type="file">
+                              File : <input name="upload[]" type="file" multiple>
                               <input type="hidden" name="path" value="<?php echo $actualDirectory;?>">
-                              <input type="submit" value="Upload" class="btn btn-success"><br>
+                              <input type="submit" name="submitUpload" value="Upload" class="btn btn-success"><br>
                         </form>
                         <form enctype="multipart/form-data" method="post" id="formCreateFile">
                               Or enter the name of the file to create : <input name="nameFileToCreate" type="text" autocomplete="off">
